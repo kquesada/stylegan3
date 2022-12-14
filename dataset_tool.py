@@ -258,8 +258,11 @@ def make_transform(
 
     def random_crop(width, height, img):
         transform = A.RandomCrop(height=height, width=width) 
-        img = transform(image=img)['image']
-        return img
+        try:
+            img = transform(image=img)['image']
+            return img
+        except:
+            print(f'Image cannot be processed for requested crop size {height}x{width}')
 
     if transform is None:
         return functools.partial(scale, output_width, output_height)
