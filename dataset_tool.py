@@ -31,6 +31,9 @@ from tqdm import tqdm
 def error(msg):
     print('Error: ' + msg)
     sys.exit(1)
+    
+def error2(msg):
+    print('Error: ' + msg)
 
 #----------------------------------------------------------------------------
 
@@ -250,6 +253,11 @@ def make_transform(
         canvas[(width - height) // 2 : (width + height) // 2, :] = img
         return canvas
 
+    def random_crop(width, height, img):
+        transform = A.RandomCrop(height=128, width=128) 
+        img = transform(image=img)['image']
+        return img
+
     if transform is None:
         return functools.partial(scale, output_width, output_height)
     if transform == 'center-crop':
@@ -260,6 +268,11 @@ def make_transform(
         if (output_width is None) or (output_height is None):
             error ('must specify --resolution=WxH when using ' + transform + ' transform')
         return functools.partial(center_crop_wide, output_width, output_height)
+    if transform == 'random-crop':
+        if (output_width is None) or (output_height is None):
+            error ('must specify --resolution=WxH when using ' + transform + ' transform')
+        return functools.partial(random_crop, output_width, output_height) 
+
     assert False, 'unknown transform'
 
 #----------------------------------------------------------------------------
@@ -435,7 +448,9 @@ def convert_dataset(
                 error('Image width/height after scale and crop are required to be power-of-two')
         elif dataset_attrs != cur_image_attrs:
             err = [f'  dataset {k}/cur image {k}: {dataset_attrs[k]}/{cur_image_attrs[k]}' for k in dataset_attrs.keys()] # pylint: disable=unsubscriptable-object
-            error(f'Image {archive_fname} attributes must be equal across all images of the dataset.  Got:\n' + '\n'.join(err))
+            # error(f'Image {archive_fname} attributes must be equal across all images of the dataset.  Got:\n' + '\n'.join(err))
+            error2(f'Image {archive_fname} attributes must be equal across all images of the dataset, this image will not be saved.  Got:\n' + '\n'.join(err))
+            continue
 
         # Save the image as an uncompressed PNG.
         img = PIL.Image.fromarray(img, { 1: 'L', 3: 'RGB' }[channels])
