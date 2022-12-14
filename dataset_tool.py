@@ -26,6 +26,9 @@ import numpy as np
 import PIL.Image
 from tqdm import tqdm
 
+import albumentations as A
+from torchvision import datasets, transforms
+
 #----------------------------------------------------------------------------
 
 def error(msg):
