@@ -257,7 +257,7 @@ def make_transform(
         return canvas
 
     def random_crop(width, height, img):
-        transform = A.RandomCrop(height=128, width=128) 
+        transform = A.RandomCrop(height=height, width=width) 
         img = transform(image=img)['image']
         return img
 
